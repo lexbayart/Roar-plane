@@ -6,7 +6,7 @@ extends Node2D
 @onready var pipes: Node2D = $Pipes
 @onready var score_label: Label = $UI/ScoreLabel
 @onready var game_over_label: Label = $UI/GameOverLabel
-@onready var restart_button: Button = $UI/RestartButton
+@onready var restart_button: TextureButton = $UI/RestartButton
 @onready var pipe_spawn_timer: Timer = $PipeSpawnTimer
 @onready var game_over_timer: Timer = $GameOverTimer
 @onready var start_label: Label = $UI/StartLabel
@@ -93,7 +93,7 @@ func _on_plane_collided() -> void:
 	_trigger_game_over()
 
 
-func _on_plane_pipe_collision(_body: Node, pipe: Node2D) -> void:
+func _on_plane_pipe_collision(_body: Node, _pipe: Node2D) -> void:
 	if game_over:
 		return
 	_trigger_game_over()
@@ -106,7 +106,7 @@ func _on_restart_pressed() -> void:
 func _start_game() -> void:
 	game_started = true
 	start_label.visible = false
-	speech.start_listening()
+	SpeechManager.start_listening()
 	pipe_spawn_timer.start()
 
 
@@ -133,7 +133,7 @@ func _trigger_game_over() -> void:
 func _on_game_over_timer_timeout() -> void:
 	game_over_label.visible = true
 	restart_button.visible = true
-	speech.stop_listening()
+	SpeechManager.stop_listening()
 
 
 func _restart_game() -> void:

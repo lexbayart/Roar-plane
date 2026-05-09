@@ -24,7 +24,7 @@ font_data = null
 [node name="Main" type="Node2D"]
 script = ExtResource("6")
 
-[node name="Background" type="Node2D"]
+[node name="Background" type="Node2D" parent="."]
 position = Vector2(432, 468)
 
 [node name="Sprite2D" type="Sprite2D" parent="Background"]
@@ -32,7 +32,7 @@ texture = ExtResource("1")
 centered = true
 scale = Vector2(0.47, 0.47)
 
-[node name="Ground" type="Node2D"]
+[node name="Ground" type="Node2D" parent="."]
 position = Vector2(432, 900)
 
 [node name="Sprite2D" type="Sprite2D" parent="Ground"]
@@ -45,7 +45,7 @@ scale = Vector2(1, 1)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground/StaticBody2D"]
 shape = SubResource("2")
 
-[node name="Ceiling" type="StaticBody2D"]
+[node name="Ceiling" type="StaticBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
 shape = SubResource("3")
@@ -62,9 +62,9 @@ scale = Vector2(1.5, 1.5)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plane"]
 shape = SubResource("1")
 
-[node name="Pipes" type="Node2D"]
+[node name="Pipes" type="Node2D" parent="."]
 
-[node name="UI" type="CanvasLayer"]
+[node name="UI" type="CanvasLayer" parent="."]
 
 [node name="ScoreLabel" type="Label" parent="UI"]
 anchors_preset = 1
@@ -121,10 +121,10 @@ visible = false
 expand = true
 stretch_mode = 1
 
-[node name="PipeSpawnTimer" type="Timer"]
+[node name="PipeSpawnTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = false
 
-[node name="GameOverTimer" type="Timer"]
+[node name="GameOverTimer" type="Timer" parent="."]
 wait_time = 0.8
 one_shot = true

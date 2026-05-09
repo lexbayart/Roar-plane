@@ -1,4 +1,5 @@
 extends Area2D
+class_name Pipe
 ## Pipe — single pipe pair (top and bottom)
 ## Moves left across the screen. Emits scored when plane passes through.
 
@@ -27,7 +28,7 @@ func _process(delta: float) -> void:
 	# Score zone check
 	if not passed and score_zone and score_zone.global_position.x < 0:
 		passed = true
-		emit_signal("scored")
+		scored.emit()
 	
 	# Remove when off-screen
 	if position.x < -200:

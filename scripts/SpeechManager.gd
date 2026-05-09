@@ -22,10 +22,21 @@ var _last_text: String = ""
 func _ready() -> void:
 	# Setup audio record bus
 	_record_bus_idx = AudioServer.get_bus_index("Record")
+	if _record_bus_idx == -1:
+		# Create Record bus dynamically if it doesn't exist
+		AudioServer.add_bus()
+		var new_idx = AudioServer.get_bus_count() - 1
+		AudioServer.set_bus_name(new_idx, "Record")
+		_record_bus_idx = new_idx
+	
+	# Add AudioEffectRecord if not present
+	var effect = AudioEffectRecord.new()
+	AudioServer.add_bus_effect(_record_bus_idx, effect, 0)
 	_recording = AudioServer.get_bus_effect(_record_bus_idx, 0) as AudioEffectRecord
+	
 	if _recording == null:
-		push_error("SpeechManager: AudioEffectRecord not found on bus 'Record'")
-		emit_signal("speech_error", "AudioEffectRecord not found on bus 'Record'")
+		push_error("SpeechManager: Failed to create AudioEffectRecord")
+		speech_error.emit("Failed to create AudioEffectRecord")
 		return
 	
 	# Ensure temp directory exists
@@ -37,7 +48,7 @@ func start_listening() -> void:
 	if _is_listening:
 		return
 	if _recording == null:
-		emit_signal("speech_error", "Recording not available")
+		speech_error.emit("Recording not available")
 		return
 	
 	_is_listening = true
@@ -85,7 +96,7 @@ func _save_and_analyze(audio: AudioStreamWAV) -> void:
 	var model_abs = ProjectSettings.globalize_path(MODEL_PATH)
 	var python_cmd = _find_python()
 	if python_cmd.is_empty():
-		emit_signal("speech_error", "Python not found. Install Python 3 and 'pip install vosk'")
+		speech_error.emit("Python not found. Install Python 3 and 'pip install vosk'")
 		return
 	
 	var output = []
@@ -97,7 +108,7 @@ func _save_and_analyze(audio: AudioStreamWAV) -> void:
 	
 	if exit_code != 0:
 		push_warning("VOSK bridge error: ", output)
-		emit_signal("speech_error", "Bridge error: " + output[0] if output.size() > 0 else "unknown")
+		speech_error.emit("Bridge error: " + output[0] if output.size() > 0 else "unknown")
 		return
 	
 	var json_str = output[0].strip_edges()
@@ -110,17 +121,17 @@ func _save_and_analyze(audio: AudioStreamWAV) -> void:
 		return  # Skip duplicate results
 	_last_text = text
 	
-	emit_signal("speech_result", text)
+	speech_result.emit(text)
 	
 	var has_r: bool = result.get("has_r_sound", false)
 	if has_r:
 		var r_words: Array = result.get("r_words", [])
-		emit_signal("R_sound_detected", r_words)
+		R_sound_detected.emit(r_words)
 
 
 func _save_wav(audio: AudioStreamWAV, path: String) -> bool:
 	var data = audio.get_data()
-	var format = audio.format
+	var _format = audio.format
 	var stereo = audio.stereo
 	var mix_rate = audio.mix_rate
 	
@@ -170,14 +181,14 @@ func _save_wav(audio: AudioStreamWAV, path: String) -> bool:
 
 
 func _mix_to_mono(stereo_data: PackedByteArray) -> PackedByteArray:
-	var sample_count = stereo_data.size() / 4
+	var sample_count = stereo_data.size() / 4.0
 	var mono = PackedByteArray()
 	mono.resize(sample_count * 2)
 	
 	for i in range(sample_count):
 		var left = stereo_data.decode_s16(i * 4)
 		var right = stereo_data.decode_s16(i * 4 + 2)
-		var mixed = clampi((left + right) / 2, -32768, 32767)
+		var mixed = clampi(int((left + right) / 2.0), -32768, 32767)
 		mono.encode_s16(i * 2, mixed)
 	
 	return mono
@@ -187,11 +198,11 @@ func _resample(data: PackedByteArray, from_rate: int, to_rate: int) -> PackedByt
 	if from_rate == to_rate:
 		return data
 	var ratio = float(to_rate) / float(from_rate)
-	var new_size = int(data.size() * ratio) / 2 * 2  # ensure even
+	var new_size = int(data.size() * ratio / 2.0) * 2  # ensure even
 	var resampled = PackedByteArray()
 	resampled.resize(new_size)
 	
-	for i in range(new_size / 2):
+	for i in range(floori(new_size / 2.0)):
 		var src_idx = int(float(i) / ratio) * 2
 		if src_idx + 1 < data.size():
 			resampled.encode_s16(i * 2, data.decode_s16(src_idx))

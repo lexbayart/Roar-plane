@@ -7,7 +7,6 @@ signal collided()
 const GRAVITY := 980.0
 const FLAP_VELOCITY := -250.0
 
-var velocity := Vector2.ZERO
 var is_dead := false
 
 # Animation frames
@@ -38,7 +37,7 @@ func _physics_process(delta: float) -> void:
 	# Apply movement
 	var collision = move_and_collide(velocity * delta)
 	if collision:
-		emit_signal("collided")
+		collided.emit()
 	
 	# Rotate plane based on velocity
 	rotation = lerpf(rotation, deg_to_rad(clampf(velocity.y * 0.1, -30, 90)), 0.15)
