@@ -87,6 +87,8 @@ func _on_pipe_spawn() -> void:
 	for child in pipe.get_children():
 		if child is Area2D and child.name != "ScoreZone":
 			child.connect("body_entered", _on_plane_pipe_collision.bind(pipe))
+		elif child.name == "ScoreZone":
+			child.body_entered.connect(_on_score_zone_entered.bind(pipe))
 
 
 func _on_plane_collided() -> void:
@@ -97,6 +99,14 @@ func _on_plane_pipe_collision(_body: Node, _pipe: Node2D) -> void:
 	if game_over:
 		return
 	_trigger_game_over()
+
+
+func _on_score_zone_entered(_body: Node, _pipe: Node2D) -> void:
+	if game_over or _pipe.passed:
+		return
+	_pipe.passed = true
+	score += 1
+	_update_score_display()
 
 
 func _on_restart_pressed() -> void:
