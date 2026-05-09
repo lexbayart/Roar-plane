@@ -1,0 +1,25 @@
+# VOSK models are large binary files — must NOT be committed or packed into .pck
+vosk_models/*
+vosk-model-small-en-us-0.15.zip
+
+# Godot specific
+.godot/
+import/
+*.translation
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build outputs
+builds/
+export/
+
+# Temp audio from speech recognition
+user://temp_audio/
+
+# OS files
+.DS_Store
+Thumbs.db

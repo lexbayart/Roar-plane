@@ -1,0 +1,130 @@
+[gd_scene load_steps=12 format=3 uid="uid://d4v5f6g7h8i9j"]
+
+[ext_resource type="Texture2D" id="1" path="res://assets/bg.png"]
+[ext_resource type="Texture2D" id="2" path="res://assets/bird1.png"]
+[ext_resource type="Texture2D" id="3" path="res://assets/pipe.png"]
+[ext_resource type="Texture2D" id="4" path="res://assets/ground.png"]
+[ext_resource type="Texture2D" id="5" path="res://assets/restart.png"]
+[ext_resource type="Script" id="6" path="res://scripts/Main.gd"]
+[ext_resource type="Script" id="7" path="res://scripts/Plane.gd"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(34, 24)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(864, 20)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(864, 30)
+
+[sub_resource type="FontFile" id="4"]
+format = 0
+font_data = null
+
+[node name="Main" type="Node2D"]
+script = ExtResource("6")
+
+[node name="Background" type="Node2D"]
+position = Vector2(432, 468)
+
+[node name="Sprite2D" type="Sprite2D" parent="Background"]
+texture = ExtResource("1")
+centered = true
+scale = Vector2(0.47, 0.47)
+
+[node name="Ground" type="Node2D"]
+position = Vector2(432, 900)
+
+[node name="Sprite2D" type="Sprite2D" parent="Ground"]
+texture = ExtResource("4")
+centered = true
+scale = Vector2(1, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Ground"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground/StaticBody2D"]
+shape = SubResource("2")
+
+[node name="Ceiling" type="StaticBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
+shape = SubResource("3")
+
+[node name="Plane" type="CharacterBody2D" parent="."]
+position = Vector2(150, 350)
+script = ExtResource("7")
+
+[node name="Sprite2D" type="Sprite2D" parent="Plane"]
+texture = ExtResource("2")
+centered = true
+scale = Vector2(1.5, 1.5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Plane"]
+shape = SubResource("1")
+
+[node name="Pipes" type="Node2D"]
+
+[node name="UI" type="CanvasLayer"]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+anchors_preset = 1
+anchor_top = 0.05
+anchor_left = 0.5
+offset_left = -100
+offset_right = 100
+offset_bottom = 40
+text = "Score: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+
+[node name="StartLabel" type="Label" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+offset_left = -180
+offset_right = 180
+offset_top = -40
+offset_bottom = 40
+text = "Say an R word to start!"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+
+[node name="GameOverLabel" type="Label" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.3
+offset_left = -120
+offset_right = 120
+offset_top = -20
+offset_bottom = 20
+text = "Game Over"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 48
+visible = false
+
+[node name="RestartButton" type="TextureButton" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+offset_left = -40
+offset_right = 40
+offset_top = 40
+offset_bottom = 120
+texture_normal = ExtResource("5")
+visible = false
+expand = true
+stretch_mode = 1
+
+[node name="PipeSpawnTimer" type="Timer"]
+wait_time = 2.0
+one_shot = false
+
+[node name="GameOverTimer" type="Timer"]
+wait_time = 0.8
+one_shot = true
