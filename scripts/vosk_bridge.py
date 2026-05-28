@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-VOSK Speech Recognition Bridge
+VOSK Speech Recognition Bridge - Russian Speech-to-Text
 Used by Roar-plane via OS.execute() from Godot
-Accepts a WAV file path as argument, returns recognized text with word details
 """
 
 import sys
@@ -11,6 +10,7 @@ import os
 
 # Add vosk to path if needed
 try:
+    import vosk
     from vosk import Model, KaldiRecognizer
 except ImportError:
     print(json.dumps({"error": "VOSK not installed. Run: pip3 install vosk"}))
@@ -22,8 +22,9 @@ def main():
         sys.exit(1)
 
     wav_path = sys.argv[1]
+    # Default to the newly downloaded Russian model
     model_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "vosk_models", "vosk-model-small-en-us-0.15"
+        os.path.dirname(os.path.abspath(__file__)), "..", "vosk_models", "vosk-model-small-ru-0.22"
     )
 
     if not os.path.exists(wav_path):
@@ -34,51 +35,43 @@ def main():
         print(json.dumps({"error": f"Model not found at: {model_path}"}))
         sys.exit(1)
 
-    # Initialize model
-    model = Model(model_path)
-    rec = KaldiRecognizer(model, 16000.0)
-    rec.SetWords(True)  # Enable word-level output with time info
+    # Initialize VOSK Russian Model
+    try:
+        vosk.SetLogLevel(-1)
+        model = Model(model_path)
+        rec = KaldiRecognizer(model, 16000.0)
+        rec.SetWords(True)  # Enable word-level output
+    except Exception as e:
+        print(json.dumps({"error": f"Failed to initialize VOSK: {str(e)}"}))
+        sys.exit(1)
 
     # Read WAV file
-    with open(wav_path, "rb") as f:
-        wav_data = f.read()
+    try:
+        with open(wav_path, "rb") as f:
+            wav_data = f.read()
+    except Exception as e:
+        print(json.dumps({"error": f"Failed to read WAV file: {str(e)}"}))
+        sys.exit(1)
 
-    # Skip WAV header (44 bytes for standard PCM WAV)
-    # VOSK accepts the full WAV including header
+    # Recognize speech
     rec.AcceptWaveform(wav_data)
-
-    # Get result
     result_json = rec.FinalResult()
     result = json.loads(result_json)
 
     # Extract text and word details
-    text = result.get("text", "")
+    text = result.get("text", "").strip()
 
-    # Get word-level details if available
-    words = []
-    if "result" in result:
-        for word_info in result["result"]:
-            words.append({
-                "word": word_info.get("word", ""),
-                "conf": word_info.get("conf", 0.0),
-                "start": word_info.get("start", 0.0),
-                "end": word_info.get("end", 0.0),
-            })
-
-    # Check for R sound (contains letter 'r' case-insensitive)
+    # Search for Russian 'р' (Cyrillic) or English 'r'
     has_r_sound = False
-    r_words = []
-    for w in text.split():
-        if 'r' in w.lower():
+    for char in text:
+        if char.lower() in ['р', 'r']:
             has_r_sound = True
-            r_words.append(w)
+            break
 
     output = {
-        "text": text,
+        "text": text if text else "тишина",
         "has_r_sound": has_r_sound,
-        "r_words": r_words,
-        "words": words,
-        "word_count": len(text.split()),
+        "word_count": len(text.split()) if text else 0
     }
 
     print(json.dumps(output))

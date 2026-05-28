@@ -1,0 +1,10 @@
+{
+  "mode": "balanced",
+  "quality": "high",
+  "interactive": true,
+  "tdd_mode": false,
+  "workflow": {
+    "research": false,
+    "plan_check": true
+  }
+}

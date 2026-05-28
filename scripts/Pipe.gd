@@ -4,77 +4,93 @@ class_name Pipe
 ## Moves left across the screen. Emits scored when plane passes through.
 
 signal scored
+signal hit
 
-const SCROLL_SPEED := -100.0
-
-@onready var top_pipe := $TopPipe
-@onready var bottom_pipe := $BottomPipe
-@onready var score_zone := $ScoreZone
+const SCROLL_SPEED := 120.0  # Установил ту же скорость, что и земля (было -100)
 
 var passed := false
 
+var star_sprite: Sprite2D
+var star_collected := false
+var _plane_node: Node2D
+var _main_node: Node2D
 
 func _ready() -> void:
-	# Random gap position (adjustable spawn Y)
-	position.y = randf_range(-100, 100)
+	# Spawns a glowing golden star in the gap center (0, 0)
+	star_sprite = Sprite2D.new()
+	star_sprite.texture = load("res://assets/star.png")
+	star_sprite.scale = Vector2(0.0625, 0.0625) # Scale to ~64x64
+	star_sprite.position = Vector2(0, 0)
+	add_child(star_sprite)
 	
-	# Wait a frame then enable collisions
-	await get_tree().process_frame
+	# Cache node paths safely
+	var root = get_parent()
+	if root:
+		_main_node = root.get_parent()
+		if _main_node:
+			_plane_node = _main_node.get_node_or_null("Plane")
 
+func set_gap(gap: float) -> void:
+	var shift = (gap - 200.0) / 2.0
+	
+	# Shift lower elements down
+	if has_node("Lower"):
+		$Lower.position.y = shift
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.position.y = 118.0 + shift
+	if has_node("CollisionShape2D2"):
+		$CollisionShape2D2.position.y = 398.0 + shift
+	
+	# Shift upper elements up
+	if has_node("Upper"):
+		$Upper.position.y = -shift
+	if has_node("CollisionShape2D3"):
+		$CollisionShape2D3.position.y = -118.0 - shift
+	if has_node("CollisionShape2D4"):
+		$CollisionShape2D4.position.y = -398.0 - shift
+	
+	# Resize score area collision to match new gap height
+	if has_node("ScoreArea/CollisionShape2D"):
+		var shape = $ScoreArea/CollisionShape2D.shape as RectangleShape2D
+		if shape:
+			shape.size.y = gap
 
 func _process(delta: float) -> void:
-	position.x += SCROLL_SPEED * delta
+	position.x -= SCROLL_SPEED * delta
 	
-	# Score zone check
-	if not passed and score_zone and score_zone.global_position.x < 0:
-		passed = true
-		scored.emit()
+	# Star collection detection (approx 65px radius)
+	if not star_collected and is_instance_valid(_plane_node) and _plane_node.is_active:
+		var dist = global_position.distance_to(_plane_node.global_position)
+		if dist < 65.0:
+			_collect_star()
 	
 	# Remove when off-screen
 	if position.x < -200:
 		queue_free()
 
 
-static func create_pair(gap_y: float, gap_size: float) -> Node2D:
-	var pair = Node2D.new()
+func _collect_star() -> void:
+	star_collected = true
+	GameState.add_point(5) # Star awards 5 points!
 	
-	# Top pipe
-	var top = Area2D.new()
-	top.name = "TopPipe"
-	var top_sprite = Sprite2D.new()
-	top_sprite.texture = preload("res://assets/pipe.png")
-	top_sprite.scale = Vector2(1, -1)  # Flip vertically
-	var top_shape = CollisionShape2D.new()
-	top_shape.shape = RectangleShape2D.new()
-	top_shape.shape.size = Vector2(52, 320)
-	top.add_child(top_sprite)
-	top.add_child(top_shape)
+	# Popping floating feedback "+5!"
+	if is_instance_valid(_main_node) and _main_node.has_method("spawn_floating_text"):
+		_main_node.spawn_floating_text("+5")
+		
+	# Gold popping star tween scale and fade
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(star_sprite, "scale", Vector2(0.12, 0.12), 0.3)
+	tween.tween_property(star_sprite, "modulate:a", 0.0, 0.3)
 	
-	# Bottom pipe
-	var bottom = Area2D.new()
-	bottom.name = "BottomPipe"
-	var bottom_sprite = Sprite2D.new()
-	bottom_sprite.texture = preload("res://assets/pipe.png")
-	var bottom_shape = CollisionShape2D.new()
-	bottom_shape.shape = RectangleShape2D.new()
-	bottom_shape.shape.size = Vector2(52, 320)
-	bottom.add_child(bottom_sprite)
-	bottom.add_child(bottom_shape)
-	
-	# Score zone (invisible area between pipes)
-	var zone = Area2D.new()
-	zone.name = "ScoreZone"
-	var zone_shape = CollisionShape2D.new()
-	zone_shape.shape = RectangleShape2D.new()
-	zone_shape.shape.size = Vector2(2, gap_size)
-	zone.add_child(zone_shape)
-	
-	pair.add_child(top)
-	pair.add_child(bottom)
-	pair.add_child(zone)
-	
-	# Position: gap is centered at gap_y
-	top.position.y = gap_y - gap_size / 2 - 160
-	bottom.position.y = gap_y + gap_size / 2 + 160
-	
-	return pair
+	var seq = create_tween()
+	seq.tween_interval(0.3)
+	seq.tween_callback(star_sprite.queue_free)
+
+func _on_body_entered(body: Node2D) -> void:
+	if body.name == "Plane":
+		hit.emit()
+
+func _on_score_area_body_entered(body: Node2D) -> void:
+	if body.name == "Plane" and not passed:
+		passed = true
+		scored.emit()

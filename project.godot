@@ -20,8 +20,13 @@ run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.png"
 
+[audio]
+
+driver/enable_input=true
+
 [autoload]
 
+GameState="*res://scripts/game_state.gd"
 SpeechManager="*res://scripts/SpeechManager.gd"
 
 [display]
