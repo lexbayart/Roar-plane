@@ -23,3 +23,7 @@ user://temp_audio/
 # OS files
 .DS_Store
 Thumbs.db
+# AI Stack Files
+AGENTS.md
+start_agent.sh
+.aider*

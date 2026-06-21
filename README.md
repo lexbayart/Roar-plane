@@ -1,157 +1,101 @@
-# Roar-plane / Рев-самолёт
+# Roar-plane / Рев-самолёт 🔷 [Beta]
 
-**A speech-controlled flying game for children practicing the English "R" sound.**
-**Речевая летающая игра для детей, тренирующих английский звук "R".**
+> A Flappy Bird-style game where your child's plane flies by speaking "R" sounds — turning speech therapy into play.
+> Летающая игра в стиле Flappy Bird, где самолёт ребёнка взлетает от звуков «Р» — превращая логопедические занятия в игру.
 
-Built with Godot 4.x + VOSK speech recognition.
-Сделано на Godot 4.x + распознавание речи VOSK.
+![Game interface](images/0.jpg)
 
-## How it works / Как работает
+---
 
-- The plane rises when you speak words containing the R sound (red, run, car, rain, rocket...)
-- Самолёт поднимается, когда вы говорите слова со звуком R
-- Silence or words without R → gravity pulls the plane down
-- Тишина или слова без R → гравитация тянет самолёт вниз
-- **No keyboard or mouse input** — voice only!
-- **Никакого ввода с клавиатуры или мыши** — только голос!
+## 🔷 What makes this different
 
-### R-sound detection / Определение звука R
+Most speech-practice apps are flashcard drills or phone-based exercises that feel like homework. Roar-plane is a **desktop game** where the core mechanic — keeping a plane in the air — is driven entirely by the child's voice. There's no keyboard, no mouse, no controller. The plane only responds to the "R" sound.
 
-The game checks if recognized words contain the letter "r" (case-insensitive).
-Игра проверяет, содержит ли распознанное слово букву "r" (регистронезависимо).
+The game uses **offline speech recognition** (VOSK engine) running locally on your computer. No internet connection is needed after setup. No data is sent to any server. Your child's voice stays on your machine.
 
-Examples / Примеры:
-- Word containing R: **red**, **run**, **car**, **are**, **rain**, **rocket**, **arrow**, **forest** → plane flaps!
-- Word without R: **cat**, **sun**, **blue**, **hello**, **goodbye** → plane falls
+It supports **both Russian and English** syllables — "ро", "ри", "ру" on the Russian side, and English words like "red", "run", "car", "rain" on the English side. The interface language can be toggled in-game with one button.
 
-## VOSK Model Setup / Установка модели VOSK
+Visual feedback is built in: a real-time microphone volume meter, glowing syllable cards that light up when the correct sound is detected, and floating text bubbles that rise from the plane. This gives the child immediate confirmation that their voice was heard and recognized.
 
-The VOSK English model is **not** included in the repository. You must download it separately.
+---
 
-Модель VOSK **не** включена в репозиторий. Скачайте её отдельно:
+## ✨ Features
+
+- 🎤 **Voice-only control** — no keyboard or mouse needed; the plane flies on "R" sounds
+- 🌍 **Bilingual support** — Russian syllables (ро, ри, ру) and English words (red, run, car, rain, rocket...)
+- 📊 **Live volume meter** — real-time microphone level bar so the child can see their voice
+- ✨ **Collectible stars** — golden stars in the gap between pipes award bonus points
+- 🏆 **Score & high score** — tracks current score and personal best across sessions
+- 📋 **Leaderboard** — top 5 scores saved locally with names and dates
+- 🔄 **One-button restart** — game-over screen with restart; or just speak "R" again to relaunch
+- 🌐 **In-game language toggle** — switch between Russian and English UI with one click
+- 🎨 **Visual feedback** — syllable cards glow red, floating text appears on successful detection
+- 📡 **Fully offline** — VOSK runs locally; no internet required after initial setup
+- ⌨️ **Debug mode** — spacebar can substitute for voice input during testing
+
+---
+
+![Collect stars and fly higher](images/0.jpg)
+
+---
+
+## 🚀 How to play
+
+1. **Install** — download the game and place the VOSK model folder next to the executable (see below)
+2. **Launch** — run the game; the microphone starts listening immediately
+3. **Speak** — say any word with an "R" sound to make the plane fly up
+4. **Dodge** — navigate through gaps between pipes; collect stars for bonus points
+5. **Crash & retry** — hit a pipe or the ground? Speak "R" again to restart
+
+### Setup
+
+The VOSK speech model is **not** bundled in the game. Download it once:
 
 ```bash
-# Download the small English model
 curl -L https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip -o vosk-model-small-en-us-0.15.zip
-
-# Unzip into the project's vosk_models/ folder
 unzip vosk-model-small-en-us-0.15.zip -d vosk_models/
 ```
 
-If the folder already exists at `vosk_models/vosk-model-small-en-us-0.15/`, you're all set.
-Если папка `vosk_models/vosk-model-small-en-us-0.15/` уже существует — всё готово.
-
-### Python Dependencies / Зависимости Python
-
-The game calls VOSK through a Python bridge script. Requires Python 3 and the `vosk` package:
+Then place the `vosk_models/` folder next to the game executable. Install the Python dependency:
 
 ```bash
 pip3 install vosk
 ```
 
-The game auto-detects `python3` or `python` at startup. If neither is found, an error message appears.
+---
 
-## Platform Build Instructions / Сборка под платформы
+## 📖 Documentation
 
-### macOS (Intel) — Priority / Приоритет
+- [**Complete User Guide**](docs/GUIDE.md) — setup, gameplay, troubleshooting
 
-```bash
-# 1. Open the project in Godot 4.x editor
-# 2. Project → Export → Add... → macOS
-# 3. In Export settings:
-#    - Architecture: x86_64
-#    - Custom Template: (leave blank, use default)
-#    - Export Mode: Export for macOS (App Bundle)
-# 4. Export Project → Choose destination
-# 5. After export, copy the vosk_models/ folder next to the .app bundle:
-#    cp -r vosk_models <YourApp>.app/Contents/Resources/
-#    (or place it alongside the .app for Development builds)
-#
-# Run: ./Roar-plane.app/Contents/MacOS/Roar-plane
-```
+---
 
-### Windows
+## 🛠️ Tech
 
-```bash
-# 1. Open in Godot 4.x editor
-# 2. Project → Export → Add... → Windows Desktop
-# 3. Architecture: x86_64
-# 4. Export Project → Roar-plane.exe
-# 5. Copy vosk_models/ folder next to the .exe
-# 6. Ensure Python 3 is installed with: pip install vosk
-#
-# Run: Roar-plane.exe
-```
+Godot 4.x (GDScript) · VOSK Speech Recognition · Python bridge · Zero external services
+Desktop-first (macOS, Windows) · Single project folder · No build step to play from editor
 
-### Android
+---
 
-```bash
-# Requirements: Godot 4.x with Android build template installed
-# 1. Project → Export → Add... → Android
-# 2. Configure:
-#    - Custom Package: (use default debug keystore for testing)
-#    - Min SDK: 24+
-#    - Target SDK: 33+
-#    - Exclude Filters: add "vosk_models/*"
-# 3. Export → Export APK
-# 4. Push vosk_models/ to device: adb push vosk_models/ /sdcard/Android/data/
-#    or bundle manually in the app's data directory
-#
-# NOTE: The Python bridge won't work natively on Android.
-# For Android, the C# addon (GodotSpeechRecognition) must be used instead.
-```
+## 💬 Feedback & Contact
 
-### iOS
+This project is in active development.
+Found a bug or have an idea? Reach out:
 
-```bash
-# Requirements: macOS + Xcode + Godot 4.x iOS export template
-# 1. Project → Export → Add... → iOS
-# 2. Configure:
-#    - App Store category: Games
-#    - Exclude Filters: "vosk_models/*"
-# 3. Export → Export Project → Open in Xcode
-# 4. In Xcode, add vosk_models/ folder to Bundle Resources
-# 5. Build and run on device (iOS simulator doesn't support mic input)
-#
-# NOTE: VOSK C# addon has limited iOS support — testing required.
-```
+- **Telegram:** [@lexbayart](https://t.me/lexbayart)
+- **GitHub Issues:** [Open an issue](https://github.com/lexbayart/Roar-plane/issues)
 
-## Project Structure / Структура проекта
+---
 
-```
-Roar-plane/
-├── README.md
-├── project.godot              # Godot project file
-├── export_presets.cfg         # Export configurations
-├── icon.png                   # App icon
-├── vosk_models/               # VOSK language models (NOT in .pck)
-│   └── vosk-model-small-en-us-0.15/
-├── assets/                    # Game textures
-│   ├── bg.png
-│   ├── bird1.png, bird2.png, bird3.png
-│   ├── pipe.png
-│   ├── ground.png
-│   └── restart.png
-├── scenes/
-│   └── Main.tscn             # Main game scene
-├── scripts/
-│   ├── Main.gd               # Game controller
-│   ├── Plane.gd              # Plane physics + animation
-│   ├── Pipe.gd               # Pipe obstacle logic
-│   ├── SpeechManager.gd      # Speech autoload (GDScript bridge)
-│   └── vosk_bridge.py        # Python VOSK bridge script
-└── addons/
-    └── godot-speech-recognition/  # C# addon (for Android/iOS builds)
-```
+## 🧪 Dev Notes
 
-## Technical Notes / Технические заметки
+`docs/` contains developer documentation: project architecture, requirements spec, development roadmap, and current state tracking.
 
-- **R-sound heuristic**: The Python bridge checks if any recognized word contains lowercase 'r'. This covers common R-sound words (are, our, ear, air, car, far, red, run, rain, rocket, arrow, forest). False positives are possible (e.g., "are" sounds like "R" but "car" has an ending R) — this is acceptable for a children's practice game.
-- **Python bridge**: `scripts/vosk_bridge.py` receives a 16kHz mono WAV file path, runs VOSK recognition, and outputs JSON with `has_r_sound`, `text`, and `r_words`.
-- **Model isolation**: The `vosk_models/` folder is excluded from `.pck` via export filters. It must be placed alongside the executable on all platforms.
-- **.NET / C#**: The `addons/godot-speech-recognition/` folder contains the C# version of VOSK integration. It's included for Android/iOS reference but the game uses the GDScript + Python bridge for desktop platforms.
-- **GDScript only** on desktop — no C# compilation required.
+---
 
-## License / Лицензия
+## 📄 License
 
-MIT — free to use, modify, and share.
+© 2025 lexbayart — [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+
+Free to use, study, and share for non-commercial purposes with attribution.
+Commercial use requires explicit written permission from the author.
