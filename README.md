@@ -35,10 +35,6 @@ Visual feedback is built in: a real-time microphone volume meter, glowing syllab
 
 ---
 
-![Collect stars and fly higher](images/0.jpg)
-
----
-
 ## 🚀 How to play
 
 1. **Install** — download the game and place the VOSK model folder next to the executable (see below)
