@@ -78,7 +78,7 @@ Desktop-first (macOS, Windows) · Single project folder · No build step to play
 This project is in active development.
 Found a bug or have an idea? Reach out:
 
-- **Telegram:** [@lexbayart](https://t.me/lexbayart)
+- **Telegram:** [@lexbay](https://t.me/lexbay)
 - **GitHub Issues:** [Open an issue](https://github.com/lexbayart/Roar-plane/issues)
 
 ---
